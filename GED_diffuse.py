@@ -5,7 +5,7 @@
 #
 # (For plane-strain cases)
 #
-# Authors: Mohammad Mousavi
+# Author: Mohammad Mousavi
 # Email: sm2652@cornell.edu
 # date: 06/01/2024
 #
