@@ -5,7 +5,7 @@
 #
 # (For plane-strain cases)
 #
-# Author: Mohammad Mousavi
+# Authors: Mohammad Mousavi
 # Email: sm2652@cornell.edu
 # date: 06/01/2024
 #
@@ -152,13 +152,6 @@ domain.set_subdomain(11, Rectangle(Point(0, 0.515*H), Point(L, 0.52*H)))
 domain.set_subdomain(12, Rectangle(Point(0, 0.52*H), Point(L, 0.525*H)))
 domain.set_subdomain(13, Rectangle(Point(0, 0.525*H), Point(L, 0.53*H)))
 
-# domain.set_subdomain(8, Rectangle(Point(0, 0.46*H), Point(L, 0.465*H)))
-# domain.set_subdomain(10, Rectangle(Point(0, 0.47*H), Point(L, 0.475*H)))
-# domain.set_subdomain(14, Rectangle(Point(0, 0.49*H), Point(L, 0.5*H)))
-# domain.set_subdomain(17, Rectangle(Point(0, 0.5*H), Point(L, 0.51*H)))
-# domain.set_subdomain(21, Rectangle(Point(0, 0.525*H), Point(L, 0.53*H)))
-# domain.set_subdomain(23, Rectangle(Point(0, 0.535*H), Point(L, 0.54*H)))
-
 mesh = generate_mesh(domain, resolution)
 boundary_markers = MeshFunction("size_t", mesh, mesh.topology().dim() - 1, mesh.domains())
 top_boundary.mark(boundary_markers, 1)
@@ -244,12 +237,6 @@ bc_u1 = DirichletBC(V.sub(0), u1, top_boundary)
 bc_u2 = DirichletBC(V.sub(0), u2, bot_boundary)
 bc_u = [bc_u1, bc_u2]
 
-# u1 = Expression([0, "t"], t=0.0, degree=1)
-# u2 = Expression([0, "-t"], t=0.0, degree=1)
-# bc_u1 = DirichletBC(V.sub(0), u1, top_boundary)
-# bc_u2 = DirichletBC(V.sub(0), u2, bot_boundary)
-# bc_u = [bc_u1, bc_u2]
-
 # bc - alpha (zero damage)
 bc_Lmbda_B = DirichletBC(CG1, 1, bot_boundary)
 bc_Lmbda_T = DirichletBC(CG1, 1, top_boundary)
@@ -269,7 +256,6 @@ Ic = tr(C) + 1
 Lmbda_ch = sqrt(Ic/3)
 Lmbda_ch = conditional(sqrt(Ic/3) > Lmbda_ch_max, Lmbda_ch_max, sqrt(Ic/3))
 
-# damage = conditional(ge(Lmbda, lambda_i), 1-((lambda_i - 1)/(Lmbda - 1)) * (1 - alpha_damage + alpha_damage * (2.718**(-beta_damage * (Lmbda - lambda_i)))), Constant(0.0))
 # Define the energy functional of the elasticity problem
 # ----------------------------------------------------------------------------
 # Constitutive functions of the damage model
@@ -289,7 +275,6 @@ def energy_density_function(u, damage):
     return a(damage)*(mu/2.0)*(Ic-3.0-2.0*ln(J)) - b_sq(damage)*p*(J-1.0) - (1./(2.*kappa))*(p**2)
 
 # Elastic energy, additional terms enforce material incompressibility and regularizes the Lagrange Multiplier:
-# The first term is from Ida's work and the second two terms are from Bin's paper
 elastic_energy    = ((1-k_ell)*a(damage)+k_ell)*(mu/2.0)*(Ic-3.0-2.0*ln(J))*dx \
                     - b_sq(damage)*p*(J-1.0)*dx - 1./(2.*kappa)*p**2*dx 
 
@@ -311,7 +296,6 @@ Lmbda_previous = interpolate(Expression("1", degree=0), CG1)
 
 def Relaxation(damage):
     return (1-damage)**g_power
-
 
 def Viscous_Relaxation(Lmbda, Lmbda_previous):
     return conditional(Lmbda > Lmbda_previous, 1, 0)
@@ -365,7 +349,6 @@ for (i_t, t) in enumerate(load_multipliers):
     # -------------------------------------------------------------------------
     # Solve for u holding alpha constant then solve for alpha holding u constant
     iteration = 1           # Initialization of iteration loop
-    # err_damage = 1.0         # Initialization for condition for iteration
     err_Lmbda = 1
 
     # Conditions for iteration
@@ -399,7 +382,6 @@ for (i_t, t) in enumerate(load_multipliers):
 
 
     # updating the lower bound to account for the irreversibility
-    # Lmbda_lb.vector()[:] = Lmbda.vector()
     Lmbda_previous.assign(Lmbda)
     damage_previous.assign(damage)
 
